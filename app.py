@@ -612,6 +612,9 @@ with key_cols[2]:
         "✅ Экономия от точности",
         fmt_money(total_accuracy_savings)
     )
+    if params['use_fpfn_model']:
+        st.caption(f"Не нанято слабых: {results['bad_hired_avoided_yearly']:.0f}")
+        st.caption(f"Не отсеяно сильных: {results['good_rejected_avoided_yearly']:.0f}")
 
 with key_cols[3]:
     st.metric(
