@@ -601,7 +601,8 @@ with key_cols[0]:
 with key_cols[1]:
     st.metric(
         "⚡ Экономия от ускорения",
-        fmt_money(results['speed_savings'])
+        fmt_money(results['speed_savings']),
+        delta=f"TTH: -{results['delta_tth_days_yearly']:.0f} дней/год"
     )
 
 with key_cols[2]:

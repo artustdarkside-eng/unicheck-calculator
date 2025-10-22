@@ -91,6 +91,10 @@ def calculate_economics(
     tth_manual_days = time_to_test_start_manual_days + (time_to_test_finish_manual_days / 8)
     tth_unicheck_days = time_to_test_start_unicheck_days + (time_to_test_finish_unicheck_days / 8)
     delta_tth_days = max(0, tth_manual_days - tth_unicheck_days)
+    
+    # Сокращение Time-to-Hire в год (дни × количество нанятых в год)
+    delta_tth_days_yearly = delta_tth_days * hires_per_year
+    
     # Экономия считается за одну позицию за счет ускорения поиска
     # На каждую позицию экономим delta_tth_days * vacancy_cost_per_day
     speed_savings = hires_per_year * delta_tth_days * vacancy_cost_per_day
@@ -193,6 +197,7 @@ def calculate_economics(
         'roi': roi,
         'payback_months': payback_months,
         'delta_tth_days': delta_tth_days,
+        'delta_tth_days_yearly': delta_tth_days_yearly,
         'delta_accuracy_pp': delta_accuracy_pp,
         
         # === Разбивка экономии ===
