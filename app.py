@@ -635,11 +635,12 @@ st.markdown("### 📊 Из чего состоит валовая экономи
 total_accuracy_savings = results['accuracy_savings'] + results['fpfn_value']
 
 pie_data = {
-    'Компонент': ['Человеко-часы', 'Ускорение', 'Точность'],
+    'Компонент': ['Человеко-часы', 'Ускорение', 'Точность', 'NPS эффект'],
     'Значение': [
         results['labor_savings'],
         results['speed_savings'],
-        total_accuracy_savings
+        total_accuracy_savings,
+        results['nps_value']
     ]
 }
 
