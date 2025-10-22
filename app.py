@@ -802,39 +802,6 @@ st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
 
 
-# === СОХРАНЕНИЕ ПРЕСЕТА ===
-
-st.subheader("💾 Сохранить как пресет")
-
-save_preset_name = st.text_input(
-    "Название пресета",
-    value="",
-    placeholder="Например: Мой_компания_2024",
-    key="preset_name_input"
-)
-
-if st.button("💿 Сохранить пресет", key="save_preset_btn"):
-    if save_preset_name.strip():
-        # Сохраняем в JSON файл
-        import json
-        import os
-        
-        presets_dir = "saved_presets"
-        if not os.path.exists(presets_dir):
-            os.makedirs(presets_dir)
-        
-        preset_file = os.path.join(presets_dir, f"{save_preset_name}.json")
-        
-        # Сохраняем только параметры (не результаты)
-        with open(preset_file, 'w', encoding='utf-8') as f:
-            json.dump(params, f, indent=2, ensure_ascii=False)
-        
-        st.success(f"✅ Пресет '{save_preset_name}' сохранён!")
-        st.toast(f"Файл: {preset_file}")
-    else:
-        st.warning("⚠️ Введите название пресета")
-
-
 # === ДИСКЛЕЙМЕР ===
 
 st.caption(
