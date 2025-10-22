@@ -623,7 +623,7 @@ with key_cols[4]:
     st.metric(
         "💎 Итоговая экономия",
         fmt_money(results['net_savings']),
-        delta=f"ROI: {fmt_roi(results['roi'])}"
+        delta=f"ROI: {fmt_roi(results['roi'])} | Окупаемость: {results['payback_months']:.1f} мес." if results['payback_months'] else "ROI: N/A"
     )
 
 st.divider()

@@ -155,6 +155,13 @@ def calculate_economics(
     else:
         roi = None
     
+    # Payback Period (период окупаемости в месяцах)
+    monthly_net_savings = net_savings / 12
+    if monthly_net_savings > 0:
+        payback_months = platform_cost / monthly_net_savings
+    else:
+        payback_months = None
+    
     # Метрики на кандидата
     if candidates_unicheck > 0:
         gross_per_candidate = gross_savings / candidates_unicheck
@@ -184,6 +191,7 @@ def calculate_economics(
         'platform_cost': platform_cost,
         'net_savings': net_savings,
         'roi': roi,
+        'payback_months': payback_months,
         'delta_tth_days': delta_tth_days,
         'delta_accuracy_pp': delta_accuracy_pp,
         
