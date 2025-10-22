@@ -8,6 +8,7 @@ import streamlit as st
 import pandas as pd
 import io
 import json
+import os
 from typing import Dict, Any
 from urllib.parse import urlencode
 import plotly.express as px
@@ -197,8 +198,24 @@ def create_comparison_table(params: Dict[str, Any], results: Dict[str, Any]) -> 
 
 # Инициализируем состояние session_state для параметров
 if "params" not in st.session_state:
-    # Первый запуск - загружаем дефолтный пресет
-    st.session_state.params = get_preset('default')
+    # Первый запуск - загружаем пресет 1.1 из saved_presets
+    import os
+    import json
+    
+    presets_dir = "saved_presets"
+    preset_file = os.path.join(presets_dir, "1.1.json")
+    
+    # Пробуем загрузить 1.1.json
+    if os.path.exists(preset_file):
+        try:
+            with open(preset_file, 'r', encoding='utf-8') as f:
+                st.session_state.params = json.load(f)
+        except:
+            # Если ошибка - загружаем дефолт
+            st.session_state.params = get_preset('default')
+    else:
+        # Если файла нет - загружаем дефолт
+        st.session_state.params = get_preset('default')
     
     # Если есть query params - перезаписываем
     query_params = get_query_params()
