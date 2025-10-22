@@ -802,68 +802,37 @@ st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
 
 
-# === ЭКСПОРТ И ШАРИНГ ===
+# === СОХРАНЕНИЕ ПРЕСЕТА ===
 
-st.subheader("📤 Экспорт и шаринг")
+st.subheader("💾 Сохранить как пресет")
 
-export_cols = st.columns([1, 1, 2])
+save_preset_name = st.text_input(
+    "Название пресета",
+    value="",
+    placeholder="Например: Мой_компания_2024",
+    key="preset_name_input"
+)
 
-with export_cols[0]:
-    csv_data = create_csv_export(params, results)
-    st.download_button(
-        label="⬇️ Скачать CSV",
-        data=csv_data,
-        file_name="unicheck_calc.csv",
-        mime="text/csv"
-    )
-
-with export_cols[1]:
-    # Формируем query params для шаринга
-    share_params = {
-        k: v for k, v in params.items()
-        if k not in ['use_fpfn_model', 'use_nps_money']  # Чекбоксы отдельно
-    }
-    share_params['use_fpfn_model'] = str(params['use_fpfn_model']).lower()
-    share_params['use_nps_money'] = str(params['use_nps_money']).lower()
-    
-    share_url = f"?{urlencode(share_params)}"
-    
-    st.text_input(
-        "🔗 Ссылка с параметрами",
-        value=share_url,
-        disabled=True
-    )
-
-with export_cols[2]:
-    # Блок сохранения пресета
-    st.markdown("**💾 Сохранить как пресет**")
-    save_preset_name = st.text_input(
-        "Название пресета",
-        value="",
-        placeholder="Например: Мой_компания_2024",
-        key="preset_name_input"
-    )
-    
-    if st.button("💿 Сохранить пресет", key="save_preset_btn"):
-        if save_preset_name.strip():
-            # Сохраняем в JSON файл
-            import json
-            import os
-            
-            presets_dir = "saved_presets"
-            if not os.path.exists(presets_dir):
-                os.makedirs(presets_dir)
-            
-            preset_file = os.path.join(presets_dir, f"{save_preset_name}.json")
-            
-            # Сохраняем только параметры (не результаты)
-            with open(preset_file, 'w', encoding='utf-8') as f:
-                json.dump(params, f, indent=2, ensure_ascii=False)
-            
-            st.success(f"✅ Пресет '{save_preset_name}' сохранён!")
-            st.toast(f"Файл: {preset_file}")
-        else:
-            st.warning("⚠️ Введите название пресета")
+if st.button("💿 Сохранить пресет", key="save_preset_btn"):
+    if save_preset_name.strip():
+        # Сохраняем в JSON файл
+        import json
+        import os
+        
+        presets_dir = "saved_presets"
+        if not os.path.exists(presets_dir):
+            os.makedirs(presets_dir)
+        
+        preset_file = os.path.join(presets_dir, f"{save_preset_name}.json")
+        
+        # Сохраняем только параметры (не результаты)
+        with open(preset_file, 'w', encoding='utf-8') as f:
+            json.dump(params, f, indent=2, ensure_ascii=False)
+        
+        st.success(f"✅ Пресет '{save_preset_name}' сохранён!")
+        st.toast(f"Файл: {preset_file}")
+    else:
+        st.warning("⚠️ Введите название пресета")
 
 
 # === ДИСКЛЕЙМЕР ===
