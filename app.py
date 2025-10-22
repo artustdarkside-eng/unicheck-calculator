@@ -600,12 +600,12 @@ with key_cols[0]:
     st.metric(
         "Инженеры",
         "",
-        delta=f"-{results['eng_hours_saved_yearly']:.0f} часов/год"
+        delta=f"{results['eng_hours_saved_yearly']:.0f} часов/год"
     )
     st.metric(
         "Рекрутеры",
         "",
-        delta=f"-{results['rec_hours_saved_yearly']:.0f} часов/год"
+        delta=f"{results['rec_hours_saved_yearly']:.0f} часов/год"
     )
 
 with key_cols[1]:
