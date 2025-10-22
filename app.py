@@ -610,7 +610,7 @@ with key_cols[2]:
     total_accuracy_savings = results['accuracy_savings'] + results['fpfn_value']
     delta_accuracy = None
     if params['use_fpfn_model']:
-        delta_accuracy = f"Не нанято слабых: {results['bad_hired_avoided_yearly']:.0f} | Не отсеяно сильных: {results['good_rejected_avoided_yearly']:.0f}"
+        delta_accuracy = f"Не нанято слабых: {results['bad_hired_avoided_yearly']:.0f}"
     st.metric(
         "✅ Экономия от точности",
         fmt_money(total_accuracy_savings),
