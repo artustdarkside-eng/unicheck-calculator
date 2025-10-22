@@ -86,6 +86,10 @@ def calculate_economics(
     labor_savings_per_check = max(0, manual_cost_per_check - unicheck_cost_per_check)
     labor_savings = labor_savings_per_check * total_checks
     
+    # Расчёт часов сэкономленных за год
+    eng_hours_saved_yearly = (eng_hours_per_cand_manual - eng_hours_per_cand_unicheck) * total_checks
+    rec_hours_saved_yearly = (rec_hours_per_cand_manual - rec_hours_per_cand_unicheck) * total_checks
+    
     # === 3. Экономия от ускорения процесса (Time-to-Hire) ===
     # Преобразуем часы в дни (предполагаем 8-часовой рабочий день)
     tth_manual_days = time_to_test_start_manual_days + (time_to_test_finish_manual_days / 8)
@@ -189,6 +193,10 @@ def calculate_economics(
     # Метрика изменения точности (процентные пункты)
     delta_accuracy_pp = max(0, bad_hire_rate_manual_pct - bad_hire_rate_unicheck_pct)
     
+    # Метрики FP/FN для отображения (в пересчёте на год)
+    bad_hired_avoided_yearly = avoided_fp  # Плохих людей не нанято
+    good_rejected_avoided_yearly = avoided_fn  # Хороших людей не отсеяно
+    
     return {
         # === Главные метрики ===
         'gross_savings': gross_savings,
@@ -202,6 +210,8 @@ def calculate_economics(
         
         # === Разбивка экономии ===
         'labor_savings': labor_savings,
+        'eng_hours_saved_yearly': eng_hours_saved_yearly,
+        'rec_hours_saved_yearly': rec_hours_saved_yearly,
         'speed_savings': speed_savings,
         'accuracy_savings': accuracy_savings_basic,
         'fpfn_value': fpfn_value,
@@ -232,6 +242,8 @@ def calculate_economics(
         'avoided_bad': avoided_bad,
         'avoided_fp': avoided_fp,
         'avoided_fn': avoided_fn,
+        'bad_hired_avoided_yearly': bad_hired_avoided_yearly,
+        'good_rejected_avoided_yearly': good_rejected_avoided_yearly,
         'delta_nps': delta_nps,
     }
 

@@ -597,6 +597,16 @@ with key_cols[0]:
         "🧑‍💼 Экономия человеко-часов",
         fmt_money(results['labor_savings'])
     )
+    st.metric(
+        "Инженеры",
+        "",
+        delta=f"{results['eng_hours_saved_yearly']:.0f} часов/год"
+    )
+    st.metric(
+        "Рекрутеры",
+        "",
+        delta=f"{results['rec_hours_saved_yearly']:.0f} часов/год"
+    )
 
 with key_cols[1]:
     st.metric(
