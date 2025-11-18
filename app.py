@@ -17,11 +17,20 @@ import plotly.graph_objects as go
 from calc import calculate_economics, calculate_single_check_economics
 from formatters import fmt_money, fmt_percent, fmt_roi, fmt_days, fmt_number
 from presets import get_preset, PRESETS
+from translations import get_text, get_all_texts
 
+
+# === ИНИЦИАЛИЗАЦИЯ ЯЗЫКА ===
+if 'language' not in st.session_state:
+    st.session_state.language = 'ru'
+
+# Получение текстов для текущего языка
+def t(key: str) -> str:
+    return get_text(key, st.session_state.language)
 
 # === КОНФИГУРАЦИЯ STREAMLIT ===
 st.set_page_config(
-    page_title="Калькулятор эффекта UniCheck",
+    page_title=t('page_title'),
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -76,82 +85,82 @@ def update_query_params(params: Dict[str, Any]) -> None:
     st.query_params.update(filtered)
 
 
-def create_csv_export(params: Dict[str, Any], results: Dict[str, Any]) -> bytes:
+def create_csv_export(params: Dict[str, Any], results: Dict[str, Any], lang: str = 'ru') -> bytes:
     """Создать CSV с результатами расчёта."""
     rows = []
     
     # Раздел: Входные параметры
-    rows.append(['ВХОДНЫЕ ПАРАМЕТРЫ', ''])
+    rows.append([get_text('input_params', lang), ''])
     rows.append(['', ''])
-    rows.append(['A. План и объёмы', ''])
-    rows.append(['План наймов в месяц', params['hires_per_month']])
-    rows.append(['Количество проверок на 1 найм', params['checks_per_hire']])
-    rows.append(['', ''])
-    
-    rows.append(['B. Часы и ставки', ''])
-    rows.append(['Ставка инженера, ₽/час', params['eng_hourly']])
-    rows.append(['Ставка рекрутера, ₽/час', params['rec_hourly']])
-    rows.append(['Часы инженера на кандидата (ручной)', params['eng_hours_per_cand_manual']])
-    rows.append(['Часы рекрутера на кандидата (ручной)', params['rec_hours_per_cand_manual']])
-    rows.append(['Часы инженера на кандидата (UniCheck)', params['eng_hours_per_cand_unicheck']])
-    rows.append(['Часы рекрутера на кандидата (UniCheck)', params['rec_hours_per_cand_unicheck']])
+    rows.append([get_text('section_plan', lang), ''])
+    rows.append([get_text('hires_per_month', lang), params['hires_per_month']])
+    rows.append([get_text('checks_per_hire', lang), params['checks_per_hire']])
     rows.append(['', ''])
     
-    rows.append(['C. Сроки процесса', ''])
-    rows.append(['Дней до старта теста (ручной)', params['time_to_test_start_manual_days']])
-    rows.append(['Дней до старта теста (UniCheck)', params['time_to_test_start_unicheck_days']])
-    rows.append(['Длительность теста (ручной)', params['time_to_test_finish_manual_days']])
-    rows.append(['Длительность теста (UniCheck)', params['time_to_test_finish_unicheck_days']])
-    rows.append(['Стоимость незакрытой позиции, ₽/день', params['vacancy_cost_per_day']])
+    rows.append([get_text('csv_hours_rates', lang), ''])
+    rows.append([get_text('csv_eng_rate', lang), params['eng_hourly']])
+    rows.append([get_text('csv_rec_rate', lang), params['rec_hourly']])
+    rows.append([get_text('csv_eng_hours_manual', lang), params['eng_hours_per_cand_manual']])
+    rows.append([get_text('csv_rec_hours_manual', lang), params['rec_hours_per_cand_manual']])
+    rows.append([get_text('csv_eng_hours_unicheck', lang), params['eng_hours_per_cand_unicheck']])
+    rows.append([get_text('csv_rec_hours_unicheck', lang), params['rec_hours_per_cand_unicheck']])
     rows.append(['', ''])
     
-    rows.append(['D. Точность', ''])
-    rows.append(['Доля ошибочных наймов (ручной), %', params['bad_hire_rate_manual_pct']])
-    rows.append(['Доля ошибочных наймов (UniCheck), %', params['bad_hire_rate_unicheck_pct']])
-    rows.append(['Стоимость ошибочного найма, ₽', params['cost_bad_hire']])
+    rows.append([get_text('csv_timing', lang), ''])
+    rows.append([get_text('csv_days_to_start_manual', lang), params['time_to_test_start_manual_days']])
+    rows.append([get_text('csv_days_to_start_unicheck', lang), params['time_to_test_start_unicheck_days']])
+    rows.append([get_text('csv_test_duration_manual', lang), params['time_to_test_finish_manual_days']])
+    rows.append([get_text('csv_test_duration_unicheck', lang), params['time_to_test_finish_unicheck_days']])
+    rows.append([get_text('csv_vacancy_cost', lang), params['vacancy_cost_per_day']])
     rows.append(['', ''])
     
-    rows.append(['E. Стоимость UniCheck', ''])
-    rows.append(['Цена проверки, ₽', params['price_per_check']])
+    rows.append([get_text('csv_accuracy', lang), ''])
+    rows.append([get_text('csv_bad_hire_manual', lang), params['bad_hire_rate_manual_pct']])
+    rows.append([get_text('csv_bad_hire_unicheck', lang), params['bad_hire_rate_unicheck_pct']])
+    rows.append([get_text('csv_bad_hire_cost', lang), params['cost_bad_hire']])
     rows.append(['', ''])
     
-    rows.append(['F. NPS', ''])
-    rows.append(['NPS (ручной процесс)', params['nps_manual']])
-    rows.append(['NPS (UniCheck)', params['nps_unicheck']])
+    rows.append([get_text('csv_unicheck_cost', lang), ''])
+    rows.append([get_text('csv_price_per_check', lang), params['price_per_check']])
+    rows.append(['', ''])
+    
+    rows.append([get_text('section_nps', lang), ''])
+    rows.append([get_text('csv_nps_manual', lang), params['nps_manual']])
+    rows.append([get_text('unicheck', lang) + ' NPS', params['nps_unicheck']])
     rows.append(['', ''])
     
     # Раздел: Результаты расчётов
-    rows.append(['РЕЗУЛЬТАТЫ РАСЧЁТОВ', ''])
+    rows.append([get_text('csv_results', lang), ''])
     rows.append(['', ''])
-    rows.append(['Ключевые метрики', ''])
-    rows.append(['Валовая экономия, ₽', results['gross_savings']])
-    rows.append(['Стоимость платформы, ₽', results['platform_cost']])
-    rows.append(['Net-экономия, ₽', results['net_savings']])
+    rows.append([get_text('csv_key_metrics', lang), ''])
+    rows.append([get_text('csv_gross_savings', lang), results['gross_savings']])
+    rows.append([get_text('csv_platform_cost', lang), results['platform_cost']])
+    rows.append([get_text('csv_net_savings', lang), results['net_savings']])
     rows.append(['ROI', results['roi'] if results['roi'] else 'N/A'])
-    rows.append(['Сокращение Time-to-Hire, дней', results['delta_tth_days']])
-    rows.append(['Улучшение точности, п.п.', results['delta_accuracy_pp']])
+    rows.append([get_text('csv_tth_reduction', lang), results['delta_tth_days']])
+    rows.append([get_text('csv_accuracy_improvement', lang), results['delta_accuracy_pp']])
     rows.append(['', ''])
     
-    rows.append(['Разбивка экономии', ''])
-    rows.append(['Экономия человеко-часов, ₽', results['labor_savings']])
-    rows.append(['Экономия от ускорения, ₽', results['speed_savings']])
-    rows.append(['Экономия от точности, ₽', results['accuracy_savings']])
-    rows.append(['Экономия от FP/FN, ₽', results['fpfn_value']])
-    rows.append(['Эффект NPS, ₽', results['nps_value']])
+    rows.append([get_text('csv_breakdown', lang), ''])
+    rows.append([get_text('csv_labor_savings', lang), results['labor_savings']])
+    rows.append([get_text('csv_speed_savings', lang), results['speed_savings']])
+    rows.append([get_text('csv_accuracy_savings', lang), results['accuracy_savings']])
+    rows.append([get_text('csv_fpfn_savings', lang), results['fpfn_value']])
+    rows.append([get_text('csv_nps_effect', lang), results['nps_value']])
     rows.append(['', ''])
     
-    rows.append(['Метрики на кандидата', ''])
-    rows.append(['Валовая экономия на кандидата, ₽', results['gross_per_candidate']])
-    rows.append(['Платформа на кандидата, ₽', results['platform_per_candidate']])
-    rows.append(['Net на кандидата, ₽', results['net_per_candidate']])
+    rows.append([get_text('csv_per_candidate', lang), ''])
+    rows.append([get_text('csv_gross_per_candidate', lang), results['gross_per_candidate']])
+    rows.append([get_text('csv_platform_per_candidate', lang), results['platform_per_candidate']])
+    rows.append([get_text('csv_net_per_candidate', lang), results['net_per_candidate']])
     rows.append(['', ''])
     
-    rows.append(['Метрики на найм', ''])
-    rows.append(['Валовая экономия на найм, ₽', results['gross_per_hire']])
-    rows.append(['Платформа на найм, ₽', results['platform_per_hire']])
-    rows.append(['Net на найм, ₽', results['net_per_hire']])
+    rows.append([get_text('csv_per_hire', lang), ''])
+    rows.append([get_text('csv_gross_per_hire', lang), results['gross_per_hire']])
+    rows.append([get_text('csv_platform_per_hire', lang), results['platform_per_hire']])
+    rows.append([get_text('csv_net_per_hire', lang), results['net_per_hire']])
     
-    df = pd.DataFrame(rows, columns=['Показатель', 'Значение'])
+    df = pd.DataFrame(rows, columns=[get_text('csv_indicator', lang), get_text('csv_value', lang)])
     
     buffer = io.StringIO()
     df.to_csv(buffer, index=False, sep=';', encoding='utf-8-sig')
@@ -209,11 +218,42 @@ if "params" not in st.session_state:
 
 # === SIDEBAR: ПАРАМЕТРЫ ===
 
-st.sidebar.title("⚙️ Параметры модели")
+with st.sidebar:
+    # Переключатель языка
+    st.markdown("### " + t('language_selector'))
+    language = st.selectbox(
+        "Language",
+        options=['ru', 'en'],
+        format_func=lambda x: '🇷🇺 Русский' if x == 'ru' else '🇺🇸 English',
+        index=0 if st.session_state.language == 'ru' else 1,
+        key='language_selector',
+        label_visibility='hidden'
+    )
+    
+    if language != st.session_state.language:
+        st.session_state.language = language
+        st.rerun()
+    
+    st.divider()
+
+st.sidebar.title("⚙️ " + t('sidebar_title'))
 
 with st.sidebar:
+    # Переключатель режима ввода
+    st.markdown("### " + t('slider_mode'))
+    input_mode = st.radio(
+        "Input Mode",
+        options=['number', 'slider'],
+        format_func=lambda x: t('number_input_mode') if x == 'number' else t('slider_input_mode'),
+        horizontal=True,
+        key='input_mode',
+        label_visibility='hidden'
+    )
+    
+    st.divider()
+    
     # Кнопка сброса параметров
-    if st.button("♻️ Сброс параметров", use_container_width=True):
+    if st.button("♻️ " + t('reset_params'), use_container_width=True):
         st.session_state.params = get_preset('default')
         st.rerun()
     
@@ -231,7 +271,7 @@ with st.sidebar:
         saved_presets.sort()
     
     if saved_presets:
-        st.markdown("**📂 Сохраненные пресеты**")
+        st.markdown("**📂 " + t('saved_presets') + "**")
         
         def load_preset_callback():
             """Callback для загрузки пресета при выборе из selectbox."""
@@ -244,12 +284,12 @@ with st.sidebar:
                         # Полностью заменить текущие параметры загруженными
                         st.session_state.params = loaded_preset
                         st.session_state.preset_loaded = True
-                        st.success(f"✅ Пресет '{selected}' загружен!")
+                        st.success(f"✅ {t('preset_loaded')} '{selected}'!")
                 except Exception as e:
-                    st.error(f"❌ Ошибка загрузки: {str(e)}")
+                    st.error(f"❌ {t('load_error')}: {str(e)}")
         
         st.selectbox(
-            "Загрузить пресет",
+            t('load_preset_label'),
             options=[""] + saved_presets,
             label_visibility="collapsed",
             key="load_preset_select",
@@ -258,256 +298,256 @@ with st.sidebar:
         
         st.divider()
     
+    # Функция для создания элементов управления
+    def create_input(key, label, min_val, max_val, default_val, step=1.0, help_text="", format_str=None):
+        """Создает слайдер или number_input в зависимости от режима."""
+        value = params.get(key, default_val)
+        
+        if st.session_state.get('input_mode', 'number') == 'slider':
+            if format_str == "%.1f":
+                return st.slider(
+                    label,
+                    min_value=float(min_val),
+                    max_value=float(max_val),
+                    value=float(value),
+                    step=float(step),
+                    help=help_text,
+                    key=f"slider_{key}"
+                )
+            else:
+                return st.slider(
+                    label,
+                    min_value=min_val,
+                    max_value=max_val,
+                    value=value,
+                    step=step,
+                    help=help_text,
+                    key=f"slider_{key}"
+                )
+        else:
+            if format_str == "%.1f":
+                return st.number_input(
+                    label,
+                    min_value=float(min_val),
+                    max_value=float(max_val),
+                    value=float(value),
+                    step=float(step),
+                    format=format_str,
+                    help=help_text,
+                    key=f"number_{key}"
+                )
+            else:
+                return st.number_input(
+                    label,
+                    min_value=min_val,
+                    max_value=max_val,
+                    value=value,
+                    step=step,
+                    help=help_text,
+                    key=f"number_{key}"
+                )
+
     # A. ПЛАН И ОБЪЁМЫ
-    st.subheader("A. План и объёмы")
+    st.subheader("A. " + t('section_plan'))
     
     params = st.session_state.params
     
-    params['hires_per_month'] = st.number_input(
-        "План наймов в месяц",
-        min_value=1,
-        max_value=500,
-        value=params.get('hires_per_month', 20),
-        step=1,
-        help="Сколько человек в месяц планируется нанять"
+    params['hires_per_month'] = create_input(
+        'hires_per_month',
+        t('hires_per_month'),
+        1, 500, 20, 1,
+        t('hires_per_month_help')
     )
     
-    params['checks_per_hire'] = st.number_input(
-        "Количество проверок на 1 найм",
-        min_value=1,
-        max_value=20,
-        value=params.get('checks_per_hire', 2),
-        step=1,
-        help="Сколько проверок нужно провести для одного найма"
+    params['checks_per_hire'] = create_input(
+        'checks_per_hire',
+        t('checks_per_hire'),
+        1, 20, 2, 1,
+        t('checks_per_hire_help')
     )
     
     # B. ЧАСЫ И СТАВКИ
-    st.subheader("B. Часы и ставки")
+    st.subheader("B. " + t('section_rates'))
     
-    params['eng_hourly'] = st.number_input(
-        "Ставка инженера, ₽/час",
-        min_value=500,
-        max_value=50000,
-        value=params.get('eng_hourly', 4000),
-        step=500,
-        help="Почасовая ставка инженера при расчёте стоимости проверки"
+    params['eng_hourly'] = create_input(
+        'eng_hourly',
+        t('eng_hourly'),
+        500, 50000, 4000, 500,
+        t('help_eng_rate')
     )
     
-    params['rec_hourly'] = st.number_input(
-        "Ставка рекрутера, ₽/час",
-        min_value=500,
-        max_value=20000,
-        value=params.get('rec_hourly', 1500),
-        step=100,
-        help="Почасовая ставка рекрутера"
+    params['rec_hourly'] = create_input(
+        'rec_hourly',
+        t('rec_hourly'),
+        500, 20000, 1500, 100,
+        t('help_rec_rate')
     )
     
     col1, col2 = st.columns(2)
     with col1:
-        params['eng_hours_per_cand_manual'] = st.number_input(
-            "Часы инженера на кандидата (ручной)",
-            min_value=0.0,
-            max_value=50.0,
-            value=float(params.get('eng_hours_per_cand_manual', 1.0)),
-            step=0.1,
-            format="%.1f"
+        params['eng_hours_per_cand_manual'] = create_input(
+            'eng_hours_per_cand_manual',
+            t('eng_hours_manual'),
+            0.0, 50.0, 1.0, 0.1,
+            "", "%.1f"
         )
-        params['eng_hours_per_cand_unicheck'] = st.number_input(
-            "Часы инженера (UniCheck)",
-            min_value=0.0,
-            max_value=50.0,
-            value=float(params.get('eng_hours_per_cand_unicheck', 0.2)),
-            step=0.1,
-            format="%.1f"
+        params['eng_hours_per_cand_unicheck'] = create_input(
+            'eng_hours_per_cand_unicheck',
+            t('eng_hours_unicheck'),
+            0.0, 50.0, 0.2, 0.1,
+            "", "%.1f"
         )
     
     with col2:
-        params['rec_hours_per_cand_manual'] = st.number_input(
-            "Часы рекрутера на кандидата (ручной)",
-            min_value=0.0,
-            max_value=50.0,
-            value=float(params.get('rec_hours_per_cand_manual', 0.5)),
-            step=0.1,
-            format="%.1f"
+        params['rec_hours_per_cand_manual'] = create_input(
+            'rec_hours_per_cand_manual',
+            t('rec_hours_manual'),
+            0.0, 50.0, 0.5, 0.1,
+            "", "%.1f"
         )
-        params['rec_hours_per_cand_unicheck'] = st.number_input(
-            "Часы рекрутера (UniCheck)",
-            min_value=0.0,
-            max_value=50.0,
-            value=float(params.get('rec_hours_per_cand_unicheck', 0.2)),
-            step=0.1,
-            format="%.1f"
+        params['rec_hours_per_cand_unicheck'] = create_input(
+            'rec_hours_per_cand_unicheck',
+            t('rec_hours_unicheck'),
+            0.0, 50.0, 0.2, 0.1,
+            "", "%.1f"
         )
     
     # C. СРОКИ ПРОЦЕССА
-    st.subheader("C. Сроки процесса")
+    st.subheader("C. " + t('section_timing'))
     
     col1, col2 = st.columns(2)
     with col1:
-        st.write("**Ручной процесс**")
-        params['time_to_test_start_manual_days'] = st.number_input(
-            "Дней до старта теста",
-            min_value=1,
-            max_value=30,
-            value=params.get('time_to_test_start_manual_days', 3),
-            key="manual_start"
+        st.write("**" + t('manual') + "**")
+        params['time_to_test_start_manual_days'] = create_input(
+            'time_to_test_start_manual_days',
+            t('time_to_test_start_manual'),
+            1, 30, 3, 1
         )
-        params['time_to_test_finish_manual_days'] = st.number_input(
-            "Длительность теста, часов",
-            min_value=1,
-            max_value=240,
-            value=params.get('time_to_test_finish_manual_days', 48),
-            key="manual_finish",
-            help="Длительность тестирования в часах (8 часов = 1 день)"
+        params['time_to_test_finish_manual_days'] = create_input(
+            'time_to_test_finish_manual_days',
+            t('time_to_test_finish_manual'),
+            1, 240, 48, 1,
+            t('help_test_duration')
         )
     
     with col2:
         st.write("**UniCheck**")
-        params['time_to_test_start_unicheck_days'] = st.number_input(
-            "Дней до старта теста",
-            min_value=0,
-            max_value=30,
-            value=params.get('time_to_test_start_unicheck_days', 1),
-            key="uni_start"
+        params['time_to_test_start_unicheck_days'] = create_input(
+            'time_to_test_start_unicheck_days',
+            t('time_to_test_start_unicheck'),
+            0, 30, 1, 1
         )
-        params['time_to_test_finish_unicheck_days'] = st.number_input(
-            "Длительность теста, часов",
-            min_value=0,
-            max_value=240,
-            value=params.get('time_to_test_finish_unicheck_days', 8),
-            key="uni_finish",
-            help="Длительность тестирования в часах (8 часов = 1 день)"
+        params['time_to_test_finish_unicheck_days'] = create_input(
+            'time_to_test_finish_unicheck_days',
+            t('time_to_test_finish_unicheck'),
+            0, 240, 8, 1,
+            t('help_test_duration')
         )
     
-    params['vacancy_cost_per_day'] = st.number_input(
-        "Стоимость незакрытой позиции, ₽/день",
-        min_value=1000,
-        max_value=500000,
-        value=params.get('vacancy_cost_per_day', 15000),
-        step=1000,
-        help="Стоимость задержки при закрытии позиции (упущенная выручка, потери продуктивности)"
+    params['vacancy_cost_per_day'] = create_input(
+        'vacancy_cost_per_day',
+        t('vacancy_cost_per_day'),
+        1000, 500000, 15000, 1000,
+        t('help_vacancy_cost')
     )
     
     # D. ТОЧНОСТЬ
-    st.subheader("D. Точность и ошибки")
+    st.subheader("D. " + t('section_accuracy'))
     
-    params['bad_hire_rate_manual_pct'] = st.number_input(
-        "Ошибочные наймы (ручной), %",
-        min_value=0,
-        max_value=50,
-        value=params.get('bad_hire_rate_manual_pct', 10),
-        help="Доля неудачных наймов при ручном процессе",
-        key="bad_hire_manual"
+    params['bad_hire_rate_manual_pct'] = create_input(
+        'bad_hire_rate_manual_pct',
+        t('bad_hire_rate_manual'),
+        0, 50, 10, 1,
+        t('help_bad_hire_manual')
     )
     st.session_state.params['bad_hire_rate_manual_pct'] = params['bad_hire_rate_manual_pct']
     
-    params['bad_hire_rate_unicheck_pct'] = st.number_input(
-        "Ошибочные наймы (UniCheck), %",
-        min_value=0,
-        max_value=50,
-        value=params.get('bad_hire_rate_unicheck_pct', 7),
-        help="Доля неудачных наймов при использовании UniCheck",
-        key="bad_hire_unicheck"
+    params['bad_hire_rate_unicheck_pct'] = create_input(
+        'bad_hire_rate_unicheck_pct',
+        t('bad_hire_rate_unicheck'),
+        0, 50, 7, 1,
+        t('help_bad_hire_unicheck')
     )
     st.session_state.params['bad_hire_rate_unicheck_pct'] = params['bad_hire_rate_unicheck_pct']
     
-    params['cost_bad_hire'] = st.number_input(
-        "Стоимость ошибочного найма, ₽",
-        min_value=100000,
-        max_value=10000000,
-        value=params.get('cost_bad_hire', 1500000),
-        step=100000,
-        help="Комбо: зарплата испыт. срока, онбординг, увольнение, рекрутинг, ущерб",
-        key="cost_bad_hire"
+    params['cost_bad_hire'] = create_input(
+        'cost_bad_hire',
+        t('cost_bad_hire'),
+        100000, 10000000, 1500000, 100000,
+        t('help_bad_hire_cost')
     )
     st.session_state.params['cost_bad_hire'] = params['cost_bad_hire']
     
     # FP/FN модель
-    st.subheader("Детальная модель точности (FP/FN)")
+    st.subheader(t('detailed_accuracy_model'))
     
     use_fpfn = st.checkbox(
-        "🔬 Использовать FP/FN анализ",
+        "🔬 " + t('use_fpfn_analysis'),
         value=st.session_state.params.get('use_fpfn_model', False),
-        help="Дополнительно учитывать ложные отказы и ложные одобрения на этапе техскрина"
+        help=t('fpfn_help')
     )
     params['use_fpfn_model'] = use_fpfn
     st.session_state.params['use_fpfn_model'] = use_fpfn
     
     if use_fpfn:
-        params['good_candidates_share'] = st.number_input(
-            "Доля реально сильных кандидатов, %",
-            min_value=10,
-            max_value=80,
-            value=params.get('good_candidates_share', 30),
-            key="good_candidates_share"
+        params['good_candidates_share'] = create_input(
+            'good_candidates_share',
+            t('good_candidates_share'),
+            10, 80, 30, 1
         )
         st.session_state.params['good_candidates_share'] = params['good_candidates_share']
         
         col1, col2 = st.columns(2)
         with col1:
-            st.write("**Ручной процесс**")
-            params['fp_rate_manual_pct'] = st.number_input(
-                "Ложные одобрения (FP), %",
-                min_value=0,
-                max_value=50,
-                value=params.get('fp_rate_manual_pct', 12),
-                key="manual_fp"
+            st.write("**" + t('manual') + "**")
+            params['fp_rate_manual_pct'] = create_input(
+                'fp_rate_manual_pct',
+                t('fp_rate_manual'),
+                0, 50, 12, 1
             )
             st.session_state.params['fp_rate_manual_pct'] = params['fp_rate_manual_pct']
             
-            params['fn_rate_manual_pct'] = st.number_input(
-                "Ложные отказы (FN), %",
-                min_value=0,
-                max_value=50,
-                value=params.get('fn_rate_manual_pct', 15),
-                key="manual_fn"
+            params['fn_rate_manual_pct'] = create_input(
+                'fn_rate_manual_pct',
+                t('fn_rate_manual'),
+                0, 50, 15, 1
             )
             st.session_state.params['fn_rate_manual_pct'] = params['fn_rate_manual_pct']
         
         with col2:
             st.write("**UniCheck**")
-            params['fp_rate_unicheck_pct'] = st.number_input(
-                "Ложные одобрения (FP), %",
-                min_value=0,
-                max_value=50,
-                value=params.get('fp_rate_unicheck_pct', 8),
-                key="uni_fp"
+            params['fp_rate_unicheck_pct'] = create_input(
+                'fp_rate_unicheck_pct',
+                t('fp_rate_unicheck'),
+                0, 50, 8, 1
             )
             st.session_state.params['fp_rate_unicheck_pct'] = params['fp_rate_unicheck_pct']
             
-            params['fn_rate_unicheck_pct'] = st.number_input(
-                "Ложные отказы (FN), %",
-                min_value=0,
-                max_value=50,
-                value=params.get('fn_rate_unicheck_pct', 10),
-                key="uni_fn"
+            params['fn_rate_unicheck_pct'] = create_input(
+                'fn_rate_unicheck_pct',
+                t('fn_rate_unicheck'),
+                0, 50, 10, 1
             )
             st.session_state.params['fn_rate_unicheck_pct'] = params['fn_rate_unicheck_pct']
         
         # Цены для FP и FN
-        st.write("**Стоимость ошибок техскрина**")
+        st.write("**" + t('techscreen_errors_cost') + "**")
         col_prices = st.columns(2)
         with col_prices[0]:
-            params['cost_fp'] = st.number_input(
-                "Стоимость ложного одобрения (FP), ₽",
-                min_value=50000,
-                max_value=5000000,
-                value=params.get('cost_fp', 300000),
-                step=50000,
-                help="Цена за приём слабого кандидата",
-                key="cost_fp"
+            params['cost_fp'] = create_input(
+                'cost_fp',
+                t('fp_cost_label'),
+                50000, 5000000, 300000, 50000,
+                t('help_fp_cost')
             )
             st.session_state.params['cost_fp'] = params['cost_fp']
         
         with col_prices[1]:
-            params['cost_fn'] = st.number_input(
-                "Стоимость ложного отказа (FN), ₽",
-                min_value=50000,
-                max_value=5000000,
-                value=params.get('cost_fn', 150000),
-                step=50000,
-                help="Цена за отказ хорошему кандидату (упущенная выгода)",
-                key="cost_fn"
+            params['cost_fn'] = create_input(
+                'cost_fn',
+                t('fn_cost_label'),
+                50000, 5000000, 150000, 50000,
+                t('help_fn_cost')
             )
             st.session_state.params['cost_fn'] = params['cost_fn']
     else:
@@ -518,51 +558,45 @@ with st.sidebar:
                 params[key] = get_preset('default').get(key, 0)
     
     # E. СТОИМОСТЬ UNICHECK
-    st.subheader("E. Стоимость UniCheck")
+    st.subheader("E. " + t('section_costs'))
     
-    params['price_per_check'] = st.number_input(
-        "Цена одной проверки, ₽",
-        min_value=0,
-        max_value=10000,
-        value=params.get('price_per_check', 1500),
-        step=100
+    params['price_per_check'] = create_input(
+        'price_per_check',
+        t('unicheck_cost_per_check'),
+        0, 10000, 1500, 100
     )
     
     # F. NPS
-    st.subheader("F. NPS процесса")
+    st.subheader("F. " + t('section_nps'))
     
     col1, col2 = st.columns(2)
     with col1:
-        params['nps_manual'] = st.number_input(
-            "NPS (ручной)",
-            min_value=-100,
-            max_value=100,
-            value=params.get('nps_manual', 10)
+        params['nps_manual'] = create_input(
+            'nps_manual',
+            "NPS (" + t('manual') + ")",
+            -100, 100, 10, 1
         )
     with col2:
-        params['nps_unicheck'] = st.number_input(
+        params['nps_unicheck'] = create_input(
+            'nps_unicheck',
             "NPS (UniCheck)",
-            min_value=-100,
-            max_value=100,
-            value=params.get('nps_unicheck', 40)
+            -100, 100, 40, 1
         )
     
     use_nps_money = st.checkbox(
-        "💰 Переводить ΔNPS в деньги",
+        "💰 " + t('enable_nps'),
         value=st.session_state.params.get('use_nps_money', False),
-        help="Если включено, разница NPS будет переведена в денежный эффект"
+        help=t('nps_enable_help')
     )
     params['use_nps_money'] = use_nps_money
     st.session_state.params['use_nps_money'] = use_nps_money
     
     if use_nps_money:
-        params['nps_to_value_coef'] = st.number_input(
-            "Коэффициент перевода Δ NPS → ₽/найм",
-            min_value=0.0,
-            max_value=100000.0,
-            value=float(params.get('nps_to_value_coef', 0.0)),
-            step=1000.0,
-            format="%.0f"
+        params['nps_to_value_coef'] = create_input(
+            'nps_to_value_coef',
+            t('nps_monetary_value'),
+            0.0, 100000.0, 0.0, 1000.0,
+            "", "%.0f"
         )
     else:
         params['nps_to_value_coef'] = 0.0
@@ -573,92 +607,108 @@ with st.sidebar:
 # === ОСНОВНОЙ КОНТЕНТ ===
 
 # Заголовок
-st.title("📊 Калькулятор эффекта UniCheck")
-st.subheader("Сравнение найма с UniCheck vs ручные проверки")
+st.title("📊 " + t('page_title'))
+st.subheader(t('comparison_subtitle'))
 
 # Синхронизируем params в session_state
 st.session_state.params.update(params)
 
+# Фильтруем параметры для calculate_economics (убираем лишние ключи)
+valid_keys = {
+    'hires_per_month', 'checks_per_hire', 'eng_hourly', 'rec_hourly',
+    'eng_hours_per_cand_manual', 'rec_hours_per_cand_manual', 
+    'eng_hours_per_cand_unicheck', 'rec_hours_per_cand_unicheck',
+    'time_to_test_start_manual_days', 'time_to_test_start_unicheck_days',
+    'time_to_test_finish_manual_days', 'time_to_test_finish_unicheck_days',
+    'vacancy_cost_per_day', 'bad_hire_rate_manual_pct', 'bad_hire_rate_unicheck_pct',
+    'cost_bad_hire', 'good_candidates_share', 'fp_rate_manual_pct', 'fn_rate_manual_pct',
+    'fp_rate_unicheck_pct', 'fn_rate_unicheck_pct', 'price_per_check',
+    'nps_manual', 'nps_unicheck', 'nps_to_value_coef', 'use_nps_money',
+    'cost_fp', 'cost_fn', 'use_fpfn_model'
+}
+
+filtered_params = {k: v for k, v in params.items() if k in valid_keys}
+
 # Выполняем расчёт
-results = calculate_economics(**params)
+results = calculate_economics(**filtered_params)
 
 # === СОЗДАЁМ ВКЛАДКИ ===
 
 tab_main = st.container()
 
 # === ОСНОВНОЙ КОНТЕНТ ===
-st.subheader("📈 Годовой эффект от применения UniCheck")
+st.subheader("📈 " + t('annual_savings'))
 
 # Главные 5 метрик
 key_cols = st.columns(5)
 
 with key_cols[0]:
     st.metric(
-        "🧑‍💼 Экономия человеко-часов",
+        "🧑‍💼 " + t('labor_hours_savings'),
         fmt_money(results['labor_savings'])
     )
     st.metric(
-        "Инженеры",
+        t('engineers'),
         "",
-        delta=f"{results['eng_hours_saved_yearly']:.0f} часов/год"
+        delta=f"{results['eng_hours_saved_yearly']:.0f} " + t('hours_per_year')
     )
     st.metric(
-        "Рекрутеры",
+        t('recruiters'),
         "",
-        delta=f"{results['rec_hours_saved_yearly']:.0f} часов/год"
+        delta=f"{results['rec_hours_saved_yearly']:.0f} " + t('hours_per_year')
     )
 
 with key_cols[1]:
     st.metric(
-        "⚡ Экономия от ускорения",
+        "⚡ " + t('speed_savings'),
         fmt_money(results['speed_savings']),
-        delta=f"TTH: -{results['delta_tth_days_yearly']:.0f} дней/год"
+        delta=f"TTH: -{results['delta_tth_days_yearly']:.0f} " + t('tth_days_per_year')
     )
 
 with key_cols[2]:
     # Суммарная экономия от точности: базовая модель + FP/FN (если включена)
     total_accuracy_savings = results['accuracy_savings'] + results['fpfn_value']
     st.metric(
-        "✅ Экономия от точности",
+        "✅ " + t('accuracy_savings_metric'),
         fmt_money(total_accuracy_savings)
     )
     if params['use_fpfn_model']:
         st.metric(
-            "Не нанято слабых",
+            t('weak_not_hired'),
             "",
             delta=f"{results['bad_hired_avoided_yearly']:.0f}"
         )
         st.metric(
-            "Не отсеяно сильных",
+            t('strong_not_rejected'),
             "",
             delta=f"{results['good_rejected_avoided_yearly']:.0f}"
         )
 
 with key_cols[3]:
     st.metric(
-        "🌟 NPS эффект",
+        "🌟 " + t('nps_effect'),
         fmt_money(results['nps_value']),
         delta=f"ΔNPS = {results['delta_nps']}"
     )
 
 with key_cols[4]:
     st.metric(
-        "💎 Итоговая экономия",
+        "💎 " + t('total_savings_metric'),
         fmt_money(results['net_savings']),
-        delta=f"ROI: {fmt_roi(results['roi'])} | Окупаемость: {results['payback_months']:.1f} мес." if results['payback_months'] else "ROI: N/A"
+        delta=f"ROI: {fmt_roi(results['roi'])} | " + t('payback') + f": {results['payback_months']:.1f} " + t('months') if results['payback_months'] else "ROI: N/A"
     )
 
 st.divider()
 
 # Визуальный график распределения экономии
-st.markdown("### 📊 Из чего состоит валовая экономия")
+st.markdown("### 📊 " + t('cost_breakdown_title'))
 
 # Суммарная экономия от точности: базовая модель + FP/FN (если включена)
 total_accuracy_savings = results['accuracy_savings'] + results['fpfn_value']
 
 pie_data = {
-    'Компонент': ['Человеко-часы', 'Ускорение', 'Точность', 'NPS эффект'],
-    'Значение': [
+    t('component'): [t('component_labor'), t('component_speed'), t('component_accuracy'), t('component_nps')],
+    t('csv_value'): [
         results['labor_savings'],
         results['speed_savings'],
         total_accuracy_savings,
@@ -670,9 +720,9 @@ pie_df = pd.DataFrame(pie_data)
 
 fig = px.pie(
     pie_df,
-    values='Значение',
-    names='Компонент',
-    title="Составляющие валовой экономии",
+    values=t('csv_value'),
+    names=t('component'),
+    title=t('pie_chart_title'),
     hole=0.3
 )
 st.plotly_chart(fig, use_container_width=True)
@@ -680,7 +730,7 @@ st.plotly_chart(fig, use_container_width=True)
 st.divider()
 
 # Таблица сравнения ключевых показателей в денежном выражении
-st.markdown("### 📋 Экономический эффект на одну проверку")
+st.markdown("### 📋 " + t('total_per_check'))
 
 # Расчёт всех значений на одну проверку (динамически пересчитывается)
 def calculate_table_data(results, params):
@@ -731,10 +781,10 @@ table_data = calculate_table_data(results, params)
 
 # Подготовка данных для столбчатых диаграмм
 components_data = {
-    'Затраты на труд': table_data['labor'],
-    'Простой вакансии (TtH)': table_data['tth'],
-    'Ошибочный найм': table_data['accuracy'],
-    'Итого на проверку': table_data['total']
+    t('labor_costs'): table_data['labor'],
+    t('tth_costs'): table_data['tth'],
+    t('accuracy_costs'): table_data['accuracy'],
+    t('total_per_check'): table_data['total']
 }
 
 # Создаём 4 диаграммы в сетке 2x2
@@ -749,7 +799,7 @@ for idx, (component_name, (manual, unicheck, savings)) in enumerate(components_d
         fig = go.Figure()
         
         fig.add_trace(go.Bar(
-            x=['Ручной', 'UniCheck', 'Экономия'],
+            x=[t('manual'), t('unicheck'), t('savings')],
             y=[manual, unicheck, savings],
             text=[fmt_money(manual), fmt_money(unicheck), fmt_money(savings)],
             textposition='auto',
@@ -757,9 +807,9 @@ for idx, (component_name, (manual, unicheck, savings)) in enumerate(components_d
         ))
         
         fig.update_layout(
-            title=f"{component_name}<br><sub>Экономия: {savings_percent:.1f}%</sub>",
+            title=f"{component_name}<br><sub>{t('chart_savings_label')}: {savings_percent:.1f}%</sub>",
             xaxis_title='',
-            yaxis_title='Стоимость, ₽',
+            yaxis_title=t('chart_cost_label'),
             height=350,
             showlegend=False,
             template='plotly_white',
@@ -769,33 +819,33 @@ for idx, (component_name, (manual, unicheck, savings)) in enumerate(components_d
         st.plotly_chart(fig, use_container_width=True)
 
 # Таблица с полной информацией и процентом экономии
-st.markdown("**Сводная таблица с процентом экономии:**")
+st.markdown("**" + t('results_title') + ":**")
 summary_table_data = {
-    'Компонент': [
-        'Затраты на труд',
-        'Простой вакансии (TtH)',
-        'Ошибочный найм (точность)',
-        'Итого на проверку'
+    t('component'): [
+        t('labor_costs'),
+        t('tth_costs'),
+        t('accuracy_costs'),
+        t('total_per_check')
     ],
-    'Ручной, ₽': [
+    t('manual_cost'): [
         fmt_money(table_data['labor'][0]),
         fmt_money(table_data['tth'][0]),
         fmt_money(table_data['accuracy'][0]),
         fmt_money(table_data['total'][0])
     ],
-    'UniCheck, ₽': [
+    t('unicheck_cost'): [
         fmt_money(table_data['labor'][1]),
         fmt_money(table_data['tth'][1]),
         fmt_money(table_data['accuracy'][1]),
         fmt_money(table_data['total'][1])
     ],
-    'Экономия, ₽': [
+    t('savings_rub'): [
         fmt_money(table_data['labor'][2]),
         fmt_money(table_data['tth'][2]),
         fmt_money(table_data['accuracy'][2]),
         fmt_money(table_data['total'][2])
     ],
-    'Экономия, %': [
+    t('savings_percent'): [
         f"{(table_data['labor'][2] / (table_data['labor'][0] + 0.01) * 100):.1f}%",
         f"{(table_data['tth'][2] / (table_data['tth'][0] + 0.01) * 100):.1f}%",
         f"{(table_data['accuracy'][2] / (table_data['accuracy'][0] + 0.01) * 100):.1f}%",
@@ -811,8 +861,4 @@ st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
 # === ДИСКЛЕЙМЕР ===
 
-st.caption(
-    "⚠️ **Дисклеймер:** Модель ориентировочная и может отличаться от реальных результатов. "
-    "Все расчёты основаны на входных параметрах. Рекомендуется валидировать предположения "
-    "на реальных данных вашей компании."
-)
+st.caption(t('disclaimer'))
